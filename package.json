@@ -1,0 +1,34 @@
+{
+  "name": "caxton",
+  "version": "1.0.0",
+  "description": "Caxton api wrapper",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhdouglass/caxton-nodejs.git"
+  },
+  "bin": {
+    "caxton": "bin/caxton"
+  },
+  "keywords": [
+    "caxton",
+    "ubuntu",
+    "push",
+    "notification"
+  ],
+  "author": "Brian Douglass",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/bhdouglass/caxton-nodejs/issues"
+  },
+  "homepage": "https://github.com/bhdouglass/caxton-nodejs#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-jshint": "^1.11.0",
+    "jshint-stylish": "^2.0.1"
+  },
+  "dependencies": {
+    "minimist": "^1.1.1",
+    "request": "^2.58.0"
+  }
+}
