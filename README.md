@@ -4,14 +4,16 @@
 
 ## Install ##
 
-`npm install --save caxton`
+* For use as a Node JS module: `npm install --save caxton`
+* For use as a command: `npm install -g caxton` (may need to use sudo)
 
 ## Usage ##
 
+Module:
 ~~~
 var caxton = require('caxton');
 
-//Fetch a token for send notifications
+//Fetch a token for sending notifications
 caxton.token('app name', 'code from the user\'s app', function(err, token) {
     if (err) {
         console.error(err);
@@ -41,6 +43,18 @@ caxton.send('app name (same name requested with token)', 'token', 'url', functio
         conosle.error(err);
     }
 });
+~~~
+
+Command Line:
+~~~
+#Fetch a token for sending notifications
+caxton --app="app name" --code="code for the user's app"
+
+#Send a notification to a user (minimum required arguments)
+caxton --app="app name" --token="token from above" --url="http://example.com/"
+
+#Send a notification to a user (all arguments)
+caxton --app="app name" --token="token from above" --url="http://example.com/" --message="message" --count=3 --sound="ring.wav" --tag="tag"
 ~~~
 
 ## License ##
