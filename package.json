@@ -1,6 +1,6 @@
 {
   "name": "caxton",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Caxton api wrapper",
   "main": "index.js",
   "repository": {
@@ -24,7 +24,8 @@
   "homepage": "https://github.com/bhdouglass/caxton-nodejs#readme",
   "devDependencies": {
     "gulp": "^3.9.0",
-    "gulp-jshint": "^1.11.0",
+    "gulp-jshint": "^2.0.4",
+    "jshint": "^2.9.4",
     "jshint-stylish": "^2.0.1"
   },
   "dependencies": {
