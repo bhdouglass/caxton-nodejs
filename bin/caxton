@@ -1,64 +1,84 @@
 #!/usr/bin/env node
 
-var caxton = require('../index');
-var minimist = require('minimist');
+const caxton = require('../index');
 
-var args = minimist(process.argv.slice(2), {
-    default: {
-        token: false,
-        send: true,
-    },
-    boolean: ['send'],
-});
+const TOKEN = 'token';
+const SEND = 'send';
+const argv = require('yargs')
+    .usage('Usage: $0 <command> [options]')
+    .command(TOKEN, 'Use the code from the Caxton app to get a token', {
+        c: {
+            alias: 'code',
+            describe: 'Code from the Caxton app',
+            demandOption: true,
+        },
+        a: {
+            alias: ['appname', 'app'],
+            describe: 'Name of your app',
+            demandOption: true,
+        },
+    })
+    .example('$0 token -c <code> -a <appname>', 'Get a token for a code')
+    .command(SEND, 'Send a url to the Caxton app on a device', {
+        t: {
+            alias: 'token',
+            describe: 'Token retrieved from the token command',
+            demandOption: true,
+        },
+        a: {
+            alias: ['appname', 'app'],
+            describe: 'Name of your app',
+            demandOption: true,
+        },
+        u: {
+            alias: 'url',
+            describe: 'Url to send to a device',
+            demandOption: true,
+        },
+        m: {
+            alias: 'message',
+            describe: 'A message to be shown in an on-screen notification on the device',
+        },
+        c: {
+            alias: 'count',
+            describe: 'A number to use in a badge on the Caxton icon',
+            number: true,
+        },
+        s: {
+            alias: 'sound',
+            describe: 'The name of a sound to play on the device when the notification arrives',
+        },
+        g: {
+            alias: 'tag',
+            describe: 'A grouping for notifications; if this is specified, a newer notification with the same tag will override the previous one',
+        },
+    })
+    .example('$0 send -t <token> -a <appname> -u <url> [options]', 'Send a url to a device')
+    .help('h')
+    .alias('h', 'help')
+    .argv;
 
-function error(msg) {
-    console.error(msg);
-    process.exit(1);
+if (argv._ == TOKEN) {
+    caxton.token(argv.appname, argv.code).then((token) => {
+        console.log(`Token: ${token}`);
+        process.exit(0);
+    }).catch((err) => {
+        console.error(`Error: ${err.message || err}`);
+        process.exit(1);
+    });
 }
-
-function success(msg) {
-    console.log(msg);
-    process.exit(0);
-}
-
-if (args.token === true) {
-    if (!args.app || !args.code) {
-        error('Please provide both "app" and "code"');
-    }
-    else {
-        caxton.token(args.app, args.code, function(err, token) {
-            if (err) {
-                error(err);
-            }
-            else {
-                success(token);
-            }
-        });
-    }
-}
-else if (args.send) {
-    if (!args.app || !args.token || !args.url) {
-        error('Please provide "app", "token", and "url"');
-    }
-    else {
-        var options = {};
-        for (var i = 0; i < caxton._send_options.length; i++) {
-            var key = caxton._send_options[i];
-            if (args[key]) {
-                options[key] = args[key];
-            }
-        }
-
-        caxton.send(args.app, args.token, args.url, options, function(err) {
-            if (err) {
-                error(err);
-            }
-            else {
-                success('Message sent!');
-            }
-        });
-    }
+else if (argv._ == SEND) {
+    caxton.send(argv.appname, argv.token, argv.url, {
+        message: argv.message,
+        count: argv.count,
+        sound: argv.sound,
+        tag: argv.tag,
+    }).catch((err) => {
+        console.error(`Error: ${err.message || err}`);
+        process.exit(1);
+    });
 }
 else {
-    error('No action specified');
+    console.error(`Invalid command "${argv._}"`);
+    process.exit(1);
 }

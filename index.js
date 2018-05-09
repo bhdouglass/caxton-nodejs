@@ -1,137 +1,81 @@
-var request = require('request');
+const axios = require('axios');
+const querystring = require('querystring');
 
-var api_url = 'https://caxton.herokuapp.com/api/';
-var send_options = ['message', 'count', 'sound', 'tag'];
+const API_BASE = 'https://caxton.herokuapp.com/api';
+const OPTION_MESSAGE = 'message';
+const OPTION_COUNT = 'count';
+const OPTION_SOUND = 'sound';
+const OPTION_TAG = 'tag';
+const VALID_OPTIONS = [
+    OPTION_MESSAGE,
+    OPTION_COUNT,
+    OPTION_SOUND,
+    OPTION_TAG,
+];
 
-function isFunction(functionToCheck) {
-    var getType = {};
-    return functionToCheck && getType.toString.call(functionToCheck) === '[object Function]';
-}
-
-function isJson(string) {
-    var value = true;
-    try {
-        JSON.parse(string);
-    }
-    catch (e) {
-        value = false;
-    }
-
-    return value;
-}
-
-function token(app, code, callback) {
-    request({
-        url: api_url + 'gettoken',
-        method: 'POST',
-        form: {
-            appname: app,
+module.exports = {
+    token(appname, code) {
+        return axios.post(`${API_BASE}/gettoken`, querystring.stringify({
+            appname: appname,
             code: code,
-        },
-    }, function (err, response, body) {
-        if (err) {
-            callback(err);
-        }
-        else {
-            if (response.statusCode == 200) {
-                if (isJson(body)) {
-                    var data = JSON.parse(body);
-                    if (data.token) {
-                        callback(null, data.token);
-                    }
-                    else {
-                        callback('Token response did not contain a token: ' + body);
-                    }
-                }
-                else {
-                    callback('Token response contained invalid json data');
-                }
+        })).then((res) => {
+            if (res.data && res.data.token) {
+                return res.data.token;
             }
-            else {
-                err = '';
-                if (isJson(body)) {
-                    var error = JSON.parse(body);
-                    if (error.error) {
-                        err = error.error;
-                    }
-                }
 
-                if (err) {
-                    callback('Token request failed: "' + err + '" (' + response.statusCode + ')');
-                }
-                else {
-                    callback('Token request failed with code: ' + response.statusCode);
-                }
+            throw new Error('An unexpected error has occured');
+        }).catch((error) => {
+            if (
+                error &&
+                error.response &&
+                error.response.data &&
+                error.response.data.error
+            ) {
+                throw new Error(error.response.data.error);
             }
-        }
-    });
-}
 
-function send(app, token, url, optionsOrCallback, callback) {
-    var options = {};
-    if (isFunction(optionsOrCallback)) {
-        callback = optionsOrCallback;
-    }
-    else if (optionsOrCallback) {
-        options = optionsOrCallback;
-    }
+            throw new Error(error);
+        });
+    },
 
-    var form = {
-        appname: app,
-        token: token,
-        url: url,
-    };
+    send(appname, token, url, options) {
+        options = options || {};
 
-    for (var i = 0; i < send_options.length; i++) {
-        var key = send_options[i];
-        if (options[key]) {
-            form[key] = options[key];
-        }
-    }
+        let data = {
+            appname: appname,
+            url: url,
+            token: token,
+        };
 
-    request({
-        url: api_url + 'send',
-        method: 'POST',
-        form: form,
-    }, function (err, response, body) {
-        if (err) {
-            callback(err);
-        }
-        else {
-            if (response.statusCode == 200) {
-                if (isJson(body)) {
-                    var data = JSON.parse(body);
-                    if (data.ok && data.ok.toLowerCase() == 'ok') {
-                        callback();
-                    }
-                    else {
-                        callback('Message not sent: ' + body);
-                    }
-                }
-                else {
-                    callback('Message response contained invalid json data');
-                }
+        VALID_OPTIONS.forEach((key) => {
+            if (key in options && options[key]) {
+                data[key] = options[key];
             }
-            else {
-                err = '';
-                if (isJson(body)) {
-                    var error = JSON.parse(body);
-                    if (error.error) {
-                        err = error.error;
-                    }
-                }
+        });
 
-                if (err) {
-                    callback('Message failed to send: "' + err + '" (' + response.statusCode + ')');
-                }
-                else {
-                    callback('Message failed to send with code: ' + response.statusCode);
-                }
+        return axios.post(`${API_BASE}/send`, querystring.stringify(data)).then((res) => {
+            if (res.data && res.data.ok && res.data.ok.toLowerCase() == 'ok') {
+                return 'ok';
             }
-        }
-    });
-}
 
-exports.token = token;
-exports.send = send;
-exports._send_options = send_options;
+            throw new Error('An unexpected error has occured');
+        }).catch((error) => {
+            if (
+                error &&
+                error.response &&
+                error.response.data &&
+                error.response.data.error
+            ) {
+                throw new Error(error.response.data.error);
+            }
+
+            throw error;
+        });
+    },
+
+    OPTION_MESSAGE: OPTION_MESSAGE,
+    OPTION_COUNT: OPTION_COUNT,
+    OPTION_SOUND: OPTION_SOUND,
+    OPTION_TAG: OPTION_TAG,
+    VALID_OPTIONS: VALID_OPTIONS,
+};

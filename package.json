@@ -1,11 +1,14 @@
 {
   "name": "caxton",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Caxton api wrapper",
   "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bhdouglass/caxton-nodejs.git"
+  },
+  "scripts": {
+    "lint": "node_modules/.bin/eslint index.js bin/caxton"
   },
   "bin": {
     "caxton": "bin/caxton"
@@ -23,13 +26,12 @@
   },
   "homepage": "https://github.com/bhdouglass/caxton-nodejs#readme",
   "devDependencies": {
-    "gulp": "^3.9.0",
-    "gulp-jshint": "^2.0.4",
-    "jshint": "^2.9.4",
-    "jshint-stylish": "^2.0.1"
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.11.0"
   },
   "dependencies": {
-    "minimist": "^1.1.1",
-    "request": "^2.58.0"
+    "axios": "^0.18.0",
+    "yargs": "^11.0.0"
   }
 }

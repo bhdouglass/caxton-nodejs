@@ -1,4 +1,3 @@
 node_modules
 .git*
-.jshintrc
-gulpfile.js
+.eslintrc.js
